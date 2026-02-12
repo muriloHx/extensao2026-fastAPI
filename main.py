@@ -1,14 +1,13 @@
-from fastapi import FastAPI 
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
-@app.get("/")
-def root():
-    return {"Hello": "World"}
+class Item(BaseModel):
+    name: str
+    price: float
+    in_stock: bool = True
 
-items = []
 @app.post("/items")
-def create_item(item: str):
-    items.append(item)
-    return items
-    
+def create_item(item: Item):
+    return item
