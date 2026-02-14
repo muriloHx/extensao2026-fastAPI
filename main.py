@@ -28,7 +28,11 @@ def validar_api_key(x_api_key: str = Header(alias="X-API-Key")):
 
 
 def validar_internal(request: Request):
+    if request.client is None:
+        raise HTTPException(status_code=401)
+
     ip = request.client.host
+
     if ip != "127.0.0.1":
         raise HTTPException(status_code=401)
 
