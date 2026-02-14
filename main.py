@@ -1,125 +1,20 @@
 import os
-from datetime import datetime
-from typing import List
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Header, HTTPException
-from pydantic import BaseModel
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, create_engine, func
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import (
-    DeclarativeBase,
-    Mapped,
-    Session,
-    mapped_column,
-    relationship,
-    sessionmaker,
-)
+from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Request
+from sqlalchemy.orm import Session
+
+import services
+from models import Base, SessionLocal, engine
+from schemas import JogosCreate, SessoesCreate, TurmasCreate
 
 load_dotenv()
+
 API_KEY = os.getenv("API_SENHA_GERAL")
-# --------------------
-# Configuração do banco
-# --------------------
-
-DATABASE_URL = "sqlite:///./db.sqlite3"
-
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},
-)
-
-SessionLocal = sessionmaker(bind=engine)
-
-
-class Base(DeclarativeBase):
-    pass
-
-
-# --------------------
-# Modelos ORM
-# --------------------
-
-
-class TurmasModel(Base):
-    __tablename__ = "turmas"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    nome: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-
-    sessoes: Mapped[List["SessoesModel"]] = relationship(
-        back_populates="turma",
-        cascade="all, delete",
-    )
-
-
-class JogosModel(Base):
-    __tablename__ = "jogos"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    nome: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-
-    sessoes: Mapped[List["SessoesModel"]] = relationship(
-        back_populates="jogo",
-        cascade="all, delete",
-    )
-
-
-class SessoesModel(Base):
-    __tablename__ = "sessoes"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    turma_id: Mapped[int] = mapped_column(ForeignKey("turmas.id", ondelete="CASCADE"))
-
-    jogo_id: Mapped[int] = mapped_column(ForeignKey("jogos.id", ondelete="CASCADE"))
-
-    palavra: Mapped[str | None] = mapped_column(String, nullable=True)
-    dificuldade: Mapped[str | None] = mapped_column(String, nullable=True)
-    tempo_total: Mapped[float | None] = mapped_column(Float, nullable=True)
-    acertos: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    erros: Mapped[int | None] = mapped_column(Integer, nullable=True)
-
-    data_execucao: Mapped[datetime] = mapped_column(
-        DateTime,
-        server_default=func.now(),
-    )
-
-    turma: Mapped["TurmasModel"] = relationship(back_populates="sessoes")
-    jogo: Mapped["JogosModel"] = relationship(back_populates="sessoes")
-
 
 Base.metadata.create_all(bind=engine)
 
-# --------------------
-# Pydantic
-# --------------------
-
-
-class TurmasCreate(BaseModel):
-    nome: str
-
-
-class JogosCreate(BaseModel):
-    nome: str
-
-
-class SessoesCreate(BaseModel):
-    turma_id: int
-    jogo_id: int
-    palavra: str | None = None
-    dificuldade: str | None = None
-    tempo_total: float | None = None
-    acertos: int | None = None
-    erros: int | None = None
-    # campos com | None = None são completamente omitiveis no request
-    # devido as particularidades que cada jogo pode ter.
-    # Ex: nem todo jogo terá campo "dificuldade"
-
-
-# --------------------
-# Dependency
-# --------------------
+app = FastAPI()
 
 
 def get_db():
@@ -129,84 +24,51 @@ def get_db():
 
 def validar_api_key(x_api_key: str = Header(alias="X-API-Key")):
     if x_api_key != API_KEY:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+        raise HTTPException(status_code=401)
 
 
-# --------------------
-# App
-# --------------------
-
-app = FastAPI()
-
-
-@app.get("/turmas")
-def get_turmas(db: Session = Depends(get_db), _: None = Depends(validar_api_key)):
-    return db.query(TurmasModel).all()
+def validar_internal(request: Request):
+    ip = request.client.host
+    if ip != "127.0.0.1":
+        raise HTTPException(status_code=401)
 
 
-@app.post("/turma")
-def add_turma(turma: TurmasCreate, db: Session = Depends(get_db)):
-    nova = TurmasModel(nome=turma.nome)
-    db.add(nova)
-    try:
-        db.commit()
-        db.refresh(nova)
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=400, detail="Turma já existe")
+client_router = APIRouter(prefix="/api/client", dependencies=[Depends(validar_api_key)])
 
-    return nova
+internal_router = APIRouter(
+    prefix="/api/internal", dependencies=[Depends(validar_internal)]
+)
 
 
-@app.delete("/turma/{turma_id}")
-def delete_turma(turma_id: int, db: Session = Depends(get_db)):
-    turma = db.get(TurmasModel, turma_id)
-    if not turma:
-        raise HTTPException(status_code=404, detail="Turma não encontrada")
-
-    db.delete(turma)
-    db.commit()
-    return {"detail": f"Turma deletada [{turma.nome}] com sucesso."}
+@client_router.get("/turmas")
+def get_turmas(db: Session = Depends(get_db)):
+    return services.listar_turmas(db)
 
 
-@app.post("/jogo")
-def add_jogo(jogo: JogosCreate, db: Session = Depends(get_db)):
-    novo = JogosModel(nome=jogo.nome)
-    db.add(novo)
-    try:
-        db.commit()
-        db.refresh(novo)
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=400, detail="Jogo já existe")
-
-    return novo
-
-
-@app.delete("/jogo/{jogo_id}")
-def delete_jogo(jogo_id: int, db: Session = Depends(get_db)):
-    jogo = db.get(JogosModel, jogo_id)
-    if not jogo:
-        raise HTTPException(status_code=404, detail="Jogo não encontrado")
-
-    db.delete(jogo)
-    db.commit()
-    return {"detail": f"Jogo {jogo.nome} deletado com sucesso"}
-
-
-@app.post("/sessao")
+@client_router.post("/sessao")
 def add_sessao(sessao: SessoesCreate, db: Session = Depends(get_db)):
-    novo = SessoesModel(
-        turma_id=sessao.turma_id,
-        jogo_id=sessao.jogo_id,
-        palavra=sessao.palavra,
-        dificuldade=sessao.dificuldade,
-        tempo_total=sessao.tempo_total,
-        acertos=sessao.acertos,
-        erros=sessao.erros,
-    )
-    db.add(novo)
-    db.commit()
-    db.refresh(novo)
+    return services.criar_sessao(db, sessao)
 
-    return novo
+
+@internal_router.post("/turma")
+def add_turma(turma: TurmasCreate, db: Session = Depends(get_db)):
+    return services.criar_turma(db, turma.nome)
+
+
+@internal_router.delete("/turma/{turma_id}")
+def delete_turma(turma_id: int, db: Session = Depends(get_db)):
+    return services.deletar_turma(db, turma_id)
+
+
+@internal_router.post("/jogo")
+def add_jogo(jogo: JogosCreate, db: Session = Depends(get_db)):
+    return services.criar_jogo(db, jogo.nome)
+
+
+@internal_router.delete("/jogo/{jogo_id}")
+def delete_jogo(jogo_id: int, db: Session = Depends(get_db)):
+    return services.deletar_jogo(db, jogo_id)
+
+
+app.include_router(client_router)
+app.include_router(internal_router)
