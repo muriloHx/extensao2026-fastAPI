@@ -1,9 +1,10 @@
+import os
 from datetime import datetime
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel
-from pydantic_core.core_schema import no_info_before_validator_function
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, create_engine, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import (
@@ -15,6 +16,8 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
+load_dotenv()
+API_KEY = os.getenv("API_SENHA_GERAL")
 # --------------------
 # Configuração do banco
 # --------------------
@@ -109,7 +112,9 @@ class SessoesCreate(BaseModel):
     tempo_total: float | None = None
     acertos: int | None = None
     erros: int | None = None
-    # campos completamente omitiveis no request, devido as particularidades que cada jogo pode ter. Ex: nem todo jogo terá campo "dificuldade"
+    # campos com | None = None são completamente omitiveis no request
+    # devido as particularidades que cada jogo pode ter.
+    # Ex: nem todo jogo terá campo "dificuldade"
 
 
 # --------------------
@@ -122,11 +127,21 @@ def get_db():
         yield session
 
 
+def validar_api_key(x_api_key: str = Header(alias="X-API-Key")):
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+
 # --------------------
 # App
 # --------------------
 
 app = FastAPI()
+
+
+@app.get("/turmas")
+def get_turmas(db: Session = Depends(get_db), _: None = Depends(validar_api_key)):
+    return db.query(TurmasModel).all()
 
 
 @app.post("/turma")
