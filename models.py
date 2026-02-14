@@ -1,6 +1,8 @@
+import os
 from datetime import datetime
 from typing import List
 
+from dotenv import load_dotenv
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, create_engine, func
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -10,7 +12,9 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
-DATABASE_URL = "sqlite:///./db.sqlite3"
+load_dotenv(dotenv_path=".env")
+DATABASE_URL = os.getenv("DATABASE_URL")
+
 
 engine = create_engine(
     DATABASE_URL,
