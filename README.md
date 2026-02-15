@@ -3,8 +3,7 @@
 API simples para gerenciamento de turmas, jogos e sessões.
 
 ## Estrutura do Projeto
-
-.
+```
 ├── main.py           # aplicação FastAPI principal
 ├── models.py         # modelos do SQLAlchemy
 ├── schemas.py        # Pydantic schemas
@@ -15,7 +14,7 @@ API simples para gerenciamento de turmas, jogos e sessões.
 ├── .env              # variáveis de ambiente (ex.: API_SENHA_GERAL)
 ├── db.sqlite3        # banco SQLite
 └── venv/             # ambiente virtual
-
+```
 ## Configuração
 
 1. Criar e ativar ambiente virtual:
