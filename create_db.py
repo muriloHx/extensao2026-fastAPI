@@ -6,7 +6,9 @@ with sqlite3.connect("db.sqlite3") as conn:
 
     CREATE TABLE IF NOT EXISTS turmas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT NOT NULL UNIQUE
+        ano INTEGER,
+        turma TEXT,
+        UNIQUE(ano,turma)
     );
 
     CREATE TABLE IF NOT EXISTS jogos (

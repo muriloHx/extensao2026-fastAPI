@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List
 
 from dotenv import load_dotenv
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, create_engine, func
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, create_engine, func, UniqueConstraint
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -33,8 +33,13 @@ class Base(DeclarativeBase):
 class TurmasModel(Base):
     __tablename__ = "turmas"
 
+    __table_args__ = (
+        UniqueConstraint("ano", "turma", name="uq_ano_turma"),
+    )
+
     id: Mapped[int] = mapped_column(primary_key=True)
-    nome: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    ano: Mapped[int] = mapped_column(Integer, nullable=True)
+    turma: Mapped[str] = mapped_column(String, nullable=True)
 
     sessoes: Mapped[List["SessoesModel"]] = relationship(
         back_populates="turma",

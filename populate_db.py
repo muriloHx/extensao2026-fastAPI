@@ -12,11 +12,11 @@ if not os.path.exists(DB_PATH):
 
 
 turmas = [
-    "1º Ano A",
-    "1º Ano B",
-    "2º Ano A",
-    "3º Ano A",
+    "B",
+    "A",
+    "C"
 ]
+ano_turmas = [1, 2, 3, 4, 5,]
 
 jogos = [
     "Aventura das Letras",
@@ -52,11 +52,12 @@ with sqlite3.connect(DB_PATH) as conn:
     cursor = conn.cursor()
 
     # Inserir turmas
-    for nome in turmas:
-        cursor.execute(
-            "INSERT OR IGNORE INTO turmas (nome) VALUES (?)",
-            (nome,),
-        )
+    for turma in turmas:
+        for ano in ano_turmas:
+            cursor.execute(
+                "INSERT OR IGNORE INTO turmas (ano, turma) VALUES (?, ?)",
+                (ano, turma),
+            )
 
     # Inserir jogos
     for nome in jogos:
