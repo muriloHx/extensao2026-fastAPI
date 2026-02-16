@@ -48,6 +48,10 @@ internal_router = APIRouter(
 def get_turmas(db: Session = Depends(get_db)):
     return services.listar_turmas(db)
 
+@internal_router.get("/turmas")
+def get_turmas(db: Session = Depends(get_db)):
+    return services.listar_turmas(db)
+
 
 @client_router.post("/sessao")
 def add_sessao(sessao: SessoesCreate, db: Session = Depends(get_db)):
