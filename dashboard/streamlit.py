@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import os
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(dotenv_path="../.env")
 API = os.getenv("API_SENHA_GERAL")
 
 def get_dataframe_api(endpoint: str) -> pd.DataFrame:

@@ -2,7 +2,8 @@ from pydantic import BaseModel
 
 
 class TurmasCreate(BaseModel):
-    nome: str
+    ano: int
+    turma: str
 
 
 class JogosCreate(BaseModel):

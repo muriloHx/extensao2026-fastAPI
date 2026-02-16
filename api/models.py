@@ -9,21 +9,8 @@ from sqlalchemy.orm import (
     Mapped,
     mapped_column,
     relationship,
-    sessionmaker,
 )
 
-load_dotenv(dotenv_path=".env")
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-if DATABASE_URL is None:
-    raise ValueError("DATABASE_URL is not set")
-
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},
-)
-
-SessionLocal = sessionmaker(bind=engine)
 
 
 class Base(DeclarativeBase):
