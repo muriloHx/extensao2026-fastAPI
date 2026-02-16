@@ -1,10 +1,15 @@
 #ENDPOINTS DE TURMAS
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from ...services import turmas_services
-from ... import schemas
-from ...database import get_db, Session
+from ...database import get_db
+from sqlalchemy.orm import Session
+
 
 router = APIRouter(
-    prefix="/client/turmas",
+    prefix="/turmas",
     tags=["Client Turmas"]
 )
+
+@router.get("/")
+def get_turmas(db: Session = Depends(get_db)):
+    return turmas_services.listar_turmas(db)

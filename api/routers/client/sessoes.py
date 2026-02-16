@@ -1,10 +1,16 @@
 #ENDPOINTS DE SESSOES
-from fastapi import APIRouter
-from ..services import sessoes_services
+from fastapi import APIRouter, Depends
+from ...services import sessoes_services
 from ... import schemas
-from ...database import get_db, Session
+from ...database import get_db
+from sqlalchemy.orm import Session
+
 
 router = APIRouter(
-    prefix="/client/sessoes",
+    prefix="/sessoes",
     tags=["Client Sessoes"]
 )
+
+@router.post("/")
+def post_sessoes(sessao: schemas.SessoesCreate, db: Session = Depends(get_db)):
+    return sessoes_services.criar_sessao(db, sessao)

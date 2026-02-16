@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 
-from ...models import TurmasModel
+from ..models import TurmasModel
 
 def listar_turmas(db: Session):
     return db.query(TurmasModel).all()
