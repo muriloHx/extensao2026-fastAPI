@@ -31,18 +31,18 @@ pip install -r requirements.txt
 ```
 3. Criar banco de dados e (opcional) popular
 ```
-python create_db.py
-python populate_db.py
+python scripts/create_db.py
+python scripts/populate_db.py
 ```
 4. Crie .env e configure como em .env.example
 ```
 #.env file
-API_SENHA_GERAL=""
+API_KEY=""
 DATABASE_URL="sqlite:///./db.sqlite3"
 ```
 5. Rodar com
 ```
-uvicorn main:app --reload
+uvicorn api.main:app --reload
 ```
 Documentação automática do FastAPI disponivel em localhost:8000/docs
 
