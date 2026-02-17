@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 router = APIRouter(
     prefix="/sessoes",
-    tags=["Client Sessoes"]
+    tags=["Client"]
 )
 
 @router.post("/")

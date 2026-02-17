@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 router = APIRouter(
     prefix="/turmas",
-    tags=["Turmas Internas"]
+    tags=["Internal"]
 )
 @router.get("/")
 def get_turmas(db: Session = Depends(get_db)):

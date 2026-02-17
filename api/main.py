@@ -52,4 +52,9 @@ client_router.include_router(client_jogos)
 client_router.include_router(client_turmas)
 client_router.include_router(client_sessoes)
 
+@app.get("/api/internal/health", tags=["Internal"])
+def health(_: None = Depends(validar_internal)):
+    return {"ok": True}
+
+
 app.include_router(client_router)

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 router = APIRouter(
     prefix="/jogos",
-    tags=["Client Jogos"]
+    tags=["Client"]
 )
 
 @router.get("/")
