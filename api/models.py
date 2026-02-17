@@ -2,8 +2,7 @@ import os
 from datetime import datetime
 from typing import List
 
-from dotenv import load_dotenv
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, create_engine, func, UniqueConstraint
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, func, UniqueConstraint
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,

@@ -17,18 +17,32 @@ def check_api_health():
 
 api_online = check_api_health()
 
-if api_online:
-    st.sidebar.success("API Online")
-else:
-    st.sidebar.error("API Offline")
-    st.error("Sem conexão com o servidor.")
-    st.stop()
+col1, col2 = st.sidebar.columns([3, 1], vertical_alignment="center")
+
+with col1:
+    if api_online:
+        st.success("API Online")
+    else:
+        st.error("API Offline")
+
+with col2:
+    if st.button("↻", width="stretch", help="Recarrega o script, verificando se há conexão"):
+        if check_api_health():
+            st.toast("Conectado", icon="🟢")
+        else:
+            st.toast("Sem conexão com a API", icon="🔴")
+
 
 @st.cache_data
 def get_data(endpoint):
-    r = requests.get(f"{API_URL}/{endpoint}")
-    r.raise_for_status()
-    return pd.DataFrame(r.json())
+    try:
+        r = requests.get(f"{API_URL}/{endpoint}/")
+        r.raise_for_status()
+        return pd.DataFrame(r.json())
+    except requests.exceptions.RequestException:
+        st.error("Erro ao buscar dados da API")
+        st.stop()
+        return pd.DataFrame()
 
 # ---- Carregar dados ----
 turmas = get_data("turmas")
