@@ -161,29 +161,36 @@ def render_filters(df_completo):
         data_min = df_completo["data_execucao"].min().date()
         data_max = df_completo["data_execucao"].max().date()
 
-        data_inicio_sel, data_fim_sel = st.date_input(
-            "Período",
-            value=(data_min, data_max),
-            min_value=data_min,
-            max_value=data_max,
-            key="periodo",
-        )
+        data_inicio_sel = data_fim_sel = None
 
-        st.button(
-            "↻",
-            width="stretch",
-            help="Recarrega o periodo completo",
-            on_click=lambda: st.session_state.update(
-                {"periodo": (data_min, data_max)}
-            ),
-        )
+        col1, col2 = st.columns([3,1], vertical_alignment="bottom")
+        try:
+            with col1:
+                data_inicio_sel, data_fim_sel = st.date_input(
+                    "Período",
+                    value=(data_min, data_max),
+                    min_value=data_min,
+                    max_value=data_max,
+                    key="periodo",
+                )
+        except ValueError: #ao clicar no primeiro dia,só uma data é retornada, como se espera duas, gera um ValueError
+            pass
+        with col2:
+            st.button(
+                "↻",
+                width="stretch",
+                help="Recarrega o periodo completo",
+                on_click=lambda: st.session_state.update(
+                    {"periodo": (data_min, data_max)}
+                ),
+            )
 
     return {
         "anos": anos_sel,
         "turmas": turma_sel,
         "jogos": jogos_sel,
-        "data_inicio": data_inicio_sel,
-        "data_fim": data_fim_sel,
+        "data_inicio": data_inicio_sel if data_inicio_sel else None,
+        "data_fim": data_fim_sel if data_fim_sel else None,
     }
 
 
@@ -267,6 +274,20 @@ def render_evolution(df):
 
     st.divider()
 
+def render_acertos_turma(df):
+    st.subheader("Relação Acertos-Turma")
+    # Agrupa por data e turma, somando acertos
+    por_data_turma = df.groupby([df["data_execucao"].dt.date, "turma"])["acertos"].sum()
+
+    # Transforma em DataFrame com datas como índice e turmas como colunas
+    pivot = por_data_turma.unstack(fill_value=0)
+
+    # Exibe gráfico de linhas
+    st.line_chart(pivot)
+
+    st.divider()
+
+
 
 def render_table(df):
     st.subheader("Dados detalhados")
@@ -305,6 +326,7 @@ def main():
     render_kpis(df)
     render_ranking(df)
     render_evolution(df)
+    render_acertos_turma(df)
     render_table(df)
 
 
