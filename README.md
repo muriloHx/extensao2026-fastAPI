@@ -1,22 +1,30 @@
 # FastAPI Escola
 
 API simples para gerenciamento de turmas, jogos e sessões.
-
-## Estrutura do Projeto
+## Estrutura
 ```
-├── main.py           # aplicação FastAPI principal
-├── models.py         # modelos do SQLAlchemy
-├── schemas.py        # Pydantic schemas
-├── services.py       # funções de negócio
-├── create_db.py      # cria o banco de dados
-├── populate_db.py    # popula dados iniciais
-├── requirements.txt  # dependências
-├── .env              # variáveis de ambiente (ex.: API_SENHA_GERAL)
-├── db.sqlite3        # banco SQLite
-└── venv/             # ambiente virtual
-```
-## Configuração
+├── api
+│   ├── config.py
+│   ├── database.py
+│   ├── __init__.py
+│   ├── main.py
+│   ├── models.py
+│   ├── __pycache__
+│   ├── routers
+│   ├── schemas.py
+│   └── services
+├── dashboard
+│   ├── .streamlit
+│   └── streamlit.py
+├── db.sqlite3
+├── .env
+├── scripts
+│   ├── create_db.py
+│   └── populate_db.py
 
+```
+
+##Rodar o projeto
 1. Criar e ativar ambiente virtual:
 
 ```bash
@@ -40,9 +48,13 @@ python scripts/populate_db.py
 API_KEY=""
 DATABASE_URL="sqlite:///./db.sqlite3"
 ```
-5. Rodar com
+5. Rodar fastapi com
 ```
 uvicorn api.main:app --reload
+```
+6. Abrir o dashboard
+```
+streamlit run dashboard/streamlit.py
 ```
 Documentação automática do FastAPI disponivel em localhost:8000/docs
 
