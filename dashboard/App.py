@@ -7,7 +7,6 @@ from streamlit_autorefresh import st_autorefresh
 # =========================================================
 # CONFIG
 # =========================================================
-
 API_URL = "http://127.0.0.1:8000/api/internal"
 
 
@@ -52,7 +51,6 @@ def get_data(endpoint):
 # =========================================================
 # DATA PROCESSING
 # =========================================================
-
 def load_and_prepare_data():
     turmas = get_data("turmas")
     jogos = get_data("jogos")
@@ -123,8 +121,9 @@ def render_api_status():
         if st.button(
             "↻",
             width="stretch",
-            help="Recarrega o script, verificando se há conexão",
+            help="Recarrega o script",
             type="primary",
+            key="sidebar_reload"
         ):
             if check_api_health():
                 st.toast("Conectado", icon="🟢")
@@ -183,6 +182,7 @@ def render_filters(df_completo):
                 on_click=lambda: st.session_state.update(
                     {"periodo": (data_min, data_max)}
                 ),
+                key="reload_periodo",
             )
 
     return {
@@ -199,7 +199,7 @@ def render_filters(df_completo):
 # =========================================================
 
 def render_download_dialog(df, filtros):
-    @st.dialog("Baixar dataframe atual (.CSV)", width="medium")
+    @st.dialog("Baixar dataframe atual (.CSV)", width="small")
     def download_dialog():
         st.subheader("Você está prestes a baixar o dataframe atual")
 
@@ -226,6 +226,7 @@ def render_download_dialog(df, filtros):
             mime="text/csv",
             type="primary",
             width="stretch",
+            key="download_button_csv",
         )
 
     st.sidebar.button(
@@ -233,6 +234,7 @@ def render_download_dialog(df, filtros):
         on_click=download_dialog,
         type="primary",
         width="stretch",
+        key="sidebar_dialog_download_button"
     )
 
 
@@ -277,16 +279,11 @@ def render_evolution(df):
 def render_acertos_turma(df):
     st.subheader("Relação Acertos-Turma")
     # Agrupa por data e turma, somando acertos
-    por_data_turma = df.groupby([df["data_execucao"].dt.date, "turma"])["acertos"].sum()
+    df_turma_acertos = (
+        df.groupby("turma")["acertos"].sum().sort_values(ascending=False)
+    )
 
-    # Transforma em DataFrame com datas como índice e turmas como colunas
-    pivot = por_data_turma.unstack(fill_value=0)
-
-    # Exibe gráfico de linhas
-    st.line_chart(pivot)
-
-    st.divider()
-
+    st.bar_chart(df_turma_acertos)
 
 
 def render_table(df):
@@ -313,22 +310,26 @@ def render_table(df):
 # =========================================================
 # MAIN
 # =========================================================
-
 def main():
     configure_page()
     render_api_status()
 
-    df_completo = load_and_prepare_data()
+    if "df_completo" not in st.session_state:
+        st.session_state["df_completo"] = load_and_prepare_data()
+
+    df_completo = st.session_state["df_completo"]
     filtros = render_filters(df_completo)
     df = apply_filters(df_completo, filtros)
 
     render_download_dialog(df, filtros)
     render_kpis(df)
     render_ranking(df)
-    render_evolution(df)
-    render_acertos_turma(df)
+    col1, col2 = st.columns(2)
+    with col1:
+        render_evolution(df)
+    with col2:
+        render_acertos_turma(df)
     render_table(df)
 
-
-if __name__ == "__main__":
+with st.spinner("Carregando"):
     main()

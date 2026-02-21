@@ -74,7 +74,7 @@ with sqlite3.connect(DB_PATH) as conn:
     jogo_ids = [row[0] for row in cursor.fetchall()]
 
     # Gerar sessões
-    for _ in range(100):  # quantidade de sessões
+    for _ in range(1000):  # quantidade de sessões
         turma_id = random.choice(turma_ids)
         jogo_id = random.choice(jogo_ids)
         palavra = random.choice(palavras)
