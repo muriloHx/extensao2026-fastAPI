@@ -217,12 +217,16 @@ def render_download_dialog(df, filtros):
 def render_kpis(df):
     st.title("Dashboard de Sessões")
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
 
     col1.metric("Total Sessões", len(df))
     col2.metric("Tempo Médio", round(df["tempo_total"].mean() or 0, 2))
     col3.metric("Acertos Totais", int(df["acertos"].sum() or 0))
     col4.metric("Erros Totais", int(df["erros"].sum() or 0))
+    with col5:
+        if st.button("Recarregar dados", type="primary"):
+            st.cache_data.clear()
+            st.rerun()
 
     st.divider()
 
