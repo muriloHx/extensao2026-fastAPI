@@ -27,4 +27,4 @@ def deletar_turma(db: Session, turma_id: int):
 
     db.delete(turma)
     db.commit()
-    return {"detail": f"Turma deletada [{turma.nome}] com sucesso."}
+    return {"detail": f"Turma deletada [{turma.turma} {turma.ano}] com sucesso."}
