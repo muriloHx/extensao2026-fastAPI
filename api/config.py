@@ -7,10 +7,10 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 API_KEY = os.getenv("API_KEY")
 
 if not DATABASE_URL:
-    raise ValueError("DATABASE_URL is not set")
+    raise ValueError("DATABASE_URL nao definido")
 
-if not os.path.exists(DATABASE_URL):
-    raise RuntimeError("Banco de dados não encontrado")
+if not os.path.exists("./db.sqlite3"):
+    raise RuntimeError("Banco de dados nao encontrado")
 
 if not API_KEY:
-    raise ValueError("API_KEY is not set")
+    raise ValueError("API_KEY nao definido")
