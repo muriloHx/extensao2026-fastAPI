@@ -1,13 +1,11 @@
 import streamlit as st
-import requests
 import pandas as pd
 from datetime import datetime
 from streamlit_autorefresh import st_autorefresh
-
+from services import get_data, check_api_health
 # =========================================================
 # CONFIG
 # =========================================================
-API_URL = "http://127.0.0.1:8000/api/internal"
 
 
 def configure_page():
@@ -22,31 +20,6 @@ def configure_page():
             "About": None,
         },
     )
-
-
-# =========================================================
-# API
-# =========================================================
-
-def check_api_health():
-    try:
-        r = requests.get(f"{API_URL}/health", timeout=2)
-        return r.status_code == 200
-    except requests.exceptions.RequestException:
-        return False
-
-
-@st.cache_data
-def get_data(endpoint):
-    try:
-        r = requests.get(f"{API_URL}/{endpoint}/")
-        r.raise_for_status()
-        return pd.DataFrame(r.json())
-    except requests.exceptions.RequestException:
-        st.error("Erro ao buscar dados da API")
-        st.stop()
-        return pd.DataFrame()
-
 
 # =========================================================
 # DATA PROCESSING
@@ -123,7 +96,6 @@ def render_api_status():
             width="stretch",
             help="Recarrega o script",
             type="primary",
-            key="sidebar_reload"
         ):
             if check_api_health():
                 st.toast("Conectado", icon="🟢")

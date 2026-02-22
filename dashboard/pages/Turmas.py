@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
-from App import check_api_health, render_api_status, get_data
-import requests
-
+from services import get_data, post_data
+from App import render_api_status
 def configure_page():
     st.set_page_config(
         page_title="Gerenciar Turmas",
@@ -18,32 +17,28 @@ def configure_page():
 
 def render_kpis(df):
     st.title("Gerenciar Turmas")
-    st.metric("Total turmas", len(df))
+    col1, col2, col3, _ = st.columns([1,1,1,2])
+    with col1:
+        st.metric("Total turmas", len(df))
+    with col2:
+        st.metric("Total anos", len(df["ano"].unique()))
+    with col3:
+        st.metric("Total seção", len(df["turma"].unique()))
 
-def post_turma(turma_nome: str, ano: int) -> None:
-    url = "http://127.0.0.1:8000/api/internal/turmas/"
-    headers = {"Content-Type": "application/json"}
+def render_forms():
+    col1, col2 = st.columns(2)
 
-    try:
-        response = requests.post(
-            url,
-            json={"ano": ano, "turma":turma_nome},
-            headers=headers,
-            timeout=5,
-        )
+    with col1:
+        with st.form("post_turma_form", enter_to_submit=False):
+            st.subheader("Adicione Turmas")
+            turma = st.text_input("Turma", placeholder="Ex: B")
+            ano = st.number_input("Ano", placeholder="Ex: 5", min_value=1)
 
-        if response.ok:
-            st.toast(f"{response.status_code} | 🟢")
-        else:
-            try:
-                detail = response.json().get("detail", "")
-            except ValueError:
-                detail = response.text
+            submitted = st.form_submit_button("Adicionar")
 
-            st.toast(f"{response.status_code} | 🔴 {detail}")
-
-    except requests.RequestException:
-        st.toast("Erro ao se conectar com a API 🔴")
+            if submitted:
+                data = {"ano": ano, "turma": turma}
+                post_data(data, "turmas")
 
 def main():
     configure_page()
@@ -53,9 +48,9 @@ def main():
 
 
     render_kpis(df_turmas)
-
+    render_forms()
     st.table(df_turmas)
 
 
-
-main()
+with st.spinner("Carregando"):
+    main()
