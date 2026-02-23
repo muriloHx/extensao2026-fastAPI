@@ -14,7 +14,8 @@ if not os.path.exists(DB_PATH):
 turmas = [
     "B",
     "A",
-    "C"
+    "C",
+    "D"
 ]
 ano_turmas = [1, 2, 3, 4, 5,]
 
@@ -74,7 +75,7 @@ with sqlite3.connect(DB_PATH) as conn:
     jogo_ids = [row[0] for row in cursor.fetchall()]
 
     # Gerar sessões
-    for _ in range(1000):  # quantidade de sessões
+    for _ in range(10000):  # quantidade de sessões
         turma_id = random.choice(turma_ids)
         jogo_id = random.choice(jogo_ids)
         palavra = random.choice(palavras)

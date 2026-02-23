@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 from streamlit_autorefresh import st_autorefresh
-from services import get_data, check_api_health
+from services import get_data, check_api_health, add_toast, render_toasts
 # =========================================================
 # CONFIG
 # =========================================================
@@ -98,9 +98,9 @@ def render_api_status():
             type="primary",
         ):
             if check_api_health():
-                st.toast("Conectado", icon="🟢")
+                add_toast("Conectado", icon="🟢")
             else:
-                st.toast("Sem conexão com a API", icon="🔴")
+                add_toast("Sem conexão com a API", icon="🔴")
 
 
 def render_filters(df_completo):
@@ -191,7 +191,7 @@ def render_download_dialog(df, filtros):
 
         st.table(filtros_df)
 
-        st.download_button(
+        if st.download_button(
             "Baixar CSV",
             data=lambda: df.to_csv(index=False).encode("utf-8"),
             file_name=f"dados_{datetime.now().strftime('%Y-%m-%d')}.csv",
@@ -199,7 +199,9 @@ def render_download_dialog(df, filtros):
             type="primary",
             width="stretch",
             key="download_button_csv",
-        )
+        ):
+            st.session_state["balloons"] = True
+            st.rerun()
 
     st.sidebar.button(
         "Baixar CSV",
@@ -224,8 +226,8 @@ def render_kpis(df):
     col3.metric("Acertos Totais", int(df["acertos"].sum() or 0))
     col4.metric("Erros Totais", int(df["erros"].sum() or 0))
     with col5:
-        if st.button("Recarregar dados", type="primary"):
-            st.cache_data.clear()
+        if st.button("Recarregar dados", type="primary", key="reload_cache_app"):
+            st.session_state.pop("df_completo", None)
             st.rerun()
 
     st.divider()
@@ -283,6 +285,7 @@ def render_table(df):
     )
 
 
+
 # =========================================================
 # MAIN
 # =========================================================
@@ -297,6 +300,7 @@ def main():
     filtros = render_filters(df_completo)
     df = apply_filters(df_completo, filtros)
 
+    render_toasts()
     render_download_dialog(df, filtros)
     render_kpis(df)
     render_ranking(df)

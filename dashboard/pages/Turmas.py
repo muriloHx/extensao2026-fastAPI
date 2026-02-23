@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from services import get_data, post_data, delete_data
+from services import get_data, post_data, delete_data, render_toasts
 from App import render_api_status
 def configure_page():
     st.set_page_config(
@@ -25,9 +25,8 @@ def render_kpis(df):
     with col3:
         st.metric("Total seção", len(df["turma"].unique()))
     with col4:
-        if st.button("Recarregar dados", type="primary"):
+        if st.button("Recarregar dados", type="primary", key="reload_cache_turmas"):
             st.cache_data.clear()
-            st.rerun()
 
 def render_forms():
     col1, col2 = st.columns(2)
@@ -35,8 +34,8 @@ def render_forms():
     with col1:
         with st.form("post_turma_form", enter_to_submit=False):
             st.subheader("Adicione Turmas")
-            turma = st.text_input("Turma", placeholder="Ex: B")
             ano = st.number_input("Ano", placeholder="Ex: 5", min_value=1, value=None)
+            turma = st.text_input("Turma", placeholder="Ex: B")
 
             submitted = st.form_submit_button("Adicionar")
 
@@ -53,7 +52,7 @@ def render_forms():
                 dialog_confirm(id)
 
 # =========================================================
-# DIALOGS
+# UTILS
 # =========================================================
 
 @st.dialog("Excluir Turma", width="small")
@@ -63,6 +62,7 @@ def dialog_confirm(id):
     with c1:
         if st.button("Sim", type="primary"):
             delete_data(id, "turmas")
+            st.rerun()
     with c2:
         if st.button("Cancelar"):
             st.rerun()
@@ -77,9 +77,12 @@ def main():
     df_turmas = get_data("turmas")
     df_turmas = df_turmas.set_index("id")
 
+    render_toasts()
     render_kpis(df_turmas)
     render_forms()
     st.table(df_turmas)
+
+
 
 
 with st.spinner("Carregando"):

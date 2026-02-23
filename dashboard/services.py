@@ -27,19 +27,19 @@ def post_data(data: dict, endpoint: str) -> None:
         )
 
         if response.ok:
-            st.toast(f"{response.status_code} | 🟢")
+            add_toast(f"{response.status_code} | 🟢")
         else:
             try:
                 detail = response.json().get("detail", "")
             except ValueError:
                 detail = response.text
 
-            st.toast(f"{response.status_code} | 🔴 {detail}")
+            add_toast(f"{response.status_code} | 🔴 {detail}")
 
     except requests.RequestException:
-        st.toast("Erro ao se conectar com a API 🔴")
+        add_toast("Erro ao se conectar com a API 🔴")
 
-@st.cache_data
+@st.cache_data()
 def get_data(endpoint: str):
     try:
         r = requests.get(f"{API_URL}/{endpoint}/")
@@ -59,14 +59,26 @@ def delete_data(id: int, endpoint: str):
             timeout=5
         )
         if response.ok:
-            st.toast(f"{response.status_code} | 🟢")
+           add_toast(f"{response.status_code} | 🟢")
         else:
             try:
                 detail = response.json().get("detail", "")
             except ValueError:
                 detail = response.text
 
-            st.toast(f"{response.status_code} | 🔴 {detail}")
+            add_toast(f"{response.status_code} | 🔴 {detail}")
 
     except requests.RequestException:
-        st.toast("Erro ao se conectar com a API 🔴")
+        add_toast("Erro ao se conectar com a API 🔴")
+
+def add_toast(mensagem: str):
+    if 'toast' not in st.session_state:
+        st.session_state['toast'] = mensagem
+
+def render_toasts():
+    if "toast" in st.session_state:
+        st.toast(st.session_state["toast"])
+        del st.session_state["toast"]
+    if "balloons" in st.session_state:
+        st.balloons()
+        del st.session_state["balloons"]
