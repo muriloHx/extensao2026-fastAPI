@@ -71,14 +71,18 @@ def delete_data(id: int, endpoint: str):
     except requests.RequestException:
         add_toast("Erro ao se conectar com a API 🔴")
 
-def add_toast(mensagem: str):
-    if 'toast' not in st.session_state:
-        st.session_state['toast'] = mensagem
+def add_toast(*args, **kwargs):
+    if "toasts" not in st.session_state:
+        st.session_state["toasts"] = []
+    st.session_state["toasts"].append((args, kwargs))
+
 
 def render_toasts():
-    if "toast" in st.session_state:
-        st.toast(st.session_state["toast"])
-        del st.session_state["toast"]
+    if "toasts" in st.session_state:
+        for args, kwargs in st.session_state["toasts"]:
+            st.toast(*args, **kwargs)
+        del st.session_state["toasts"]
+
     if "balloons" in st.session_state:
         st.balloons()
         del st.session_state["balloons"]
