@@ -18,3 +18,8 @@ class SessoesCreate(BaseModel):
     tempo_total: float | None = None
     acertos: int | None = None
     erros: int | None = None
+
+class AlunosCreate(BaseModel):
+    turma_id: int | None = None
+    ra: int
+    nome: str

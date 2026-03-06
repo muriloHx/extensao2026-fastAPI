@@ -31,6 +31,10 @@ class TurmasModel(Base):
         back_populates="turma",
         cascade="all, delete",
     )
+    alunos: Mapped[List["AlunosModel"]] = relationship(
+        back_populates="turma",
+        cascade="all, delete",
+    )
 
 
 class JogosModel(Base):
@@ -66,3 +70,14 @@ class SessoesModel(Base):
 
     turma: Mapped["TurmasModel"] = relationship(back_populates="sessoes")
     jogo: Mapped["JogosModel"] = relationship(back_populates="sessoes")
+
+class AlunosModel(Base):
+    __tablename__ = "alunos"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    turma_id: Mapped[int] = mapped_column(ForeignKey("turmas.id", ondelete="CASCADE"))
+
+    ra: Mapped[int] = mapped_column(Integer)
+    nome: Mapped[str] = mapped_column(String)
+
+    turma: Mapped["TurmasModel"] = relationship(back_populates="alunos")
