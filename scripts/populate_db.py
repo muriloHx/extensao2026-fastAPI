@@ -10,7 +10,8 @@ if not os.path.exists(DB_PATH):
     print(f"O banco de dados [{DB_PATH}] ainda não existe")
     sys.exit()
 
-
+nomes = ["Joao", "Maria", "Jose"]
+sobrenomes = ["Silva","Santos"]
 turmas = [
     "B",
     "A",
@@ -51,7 +52,7 @@ def random_datetime_last_days(days=30):
 with sqlite3.connect(DB_PATH) as conn:
     conn.execute("PRAGMA foreign_keys = ON;")
     cursor = conn.cursor()
-
+    
     # Inserir turmas
     for turma in turmas:
         for ano in ano_turmas:
@@ -112,6 +113,15 @@ with sqlite3.connect(DB_PATH) as conn:
                 data_execucao,
             ),
         )
+    #inserir alunos
+    for i in range(100):
+        aluno_nome = " ".join([random.choice(nomes), random.choice(sobrenomes)])
+        ra = int(f"2025{i:04d}")
+        turma_id = random.choice(turma_ids)
+        cursor.execute(
+                "INSERT OR IGNORE INTO alunos (nome, ra, turma_id) VALUES (?, ?, ?)",
+                (aluno_nome, ra, turma_id),
+            )
 
     conn.commit()
 
