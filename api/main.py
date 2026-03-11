@@ -36,6 +36,7 @@ def health():
 internal_router.include_router(internal_jogos)
 internal_router.include_router(internal_turmas)
 internal_router.include_router(internal_sessoes)
+internal_router.include_router(internal_alunos)
 app.include_router(internal_router)
 
 # --------------------------
