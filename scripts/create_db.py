@@ -11,6 +11,14 @@ with sqlite3.connect("db.sqlite3") as conn:
         UNIQUE(ano,turma)
     );
 
+    CREATE TABLE IF NOT EXISTS alunos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT,
+        ra TEXT NOT NULL UNIQUE,
+        turma_id INT,
+        FOREIGN KEY (turma_id) REFERENCES turmas(id) ON DELETE CASCADE
+    );
+
     CREATE TABLE IF NOT EXISTS jogos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT NOT NULL UNIQUE
