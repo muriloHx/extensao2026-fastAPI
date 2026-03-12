@@ -28,6 +28,10 @@ def load_and_prepare_data():
     turmas = get_data("turmas")
     jogos = get_data("jogos")
     sessoes = get_data("sessoes")
+    alunos = get_data("alunos")
+
+    alunos.rename(columns={"nome": "aluno_nome"}, inplace=True)
+    jogos.rename(columns={"nome": "jogo_nome"}, inplace=True)
 
     df = sessoes.merge(
         turmas,
@@ -42,8 +46,14 @@ def load_and_prepare_data():
         right_on="id",
         suffixes=("", "_jogo"),
     )
+    df = df.merge(
+        alunos,
+        left_on="aluno_ra",
+        right_on="ra",
+        suffixes=("","_aluno"),
+    )
 
-    df.rename(columns={"nome": "jogo_nome"}, inplace=True)
+
     df["data_execucao"] = pd.to_datetime(df["data_execucao"])
 
     return df
@@ -272,6 +282,8 @@ def render_table(df):
             [
                 "ano",
                 "turma",
+                "aluno_nome",
+                "aluno_ra",
                 "jogo_nome",
                 "palavra",
                 "dificuldade",
@@ -279,6 +291,7 @@ def render_table(df):
                 "acertos",
                 "erros",
                 "data_execucao",
+
             ]
         ],
         width="stretch",
@@ -310,6 +323,7 @@ def main():
     with col2:
         render_acertos_turma(df)
     render_table(df)
+
 
 with st.spinner("Carregando"):
     main()
