@@ -11,19 +11,17 @@ if not os.path.exists(DB_PATH):
     sys.exit()
 
 nomes = ["Joao", "Maria", "Jose"]
-sobrenomes = ["Silva","Santos"]
-turmas = [
-    "B",
-    "A",
-    "C",
-    "D"
+sobrenomes = ["Silva", "Santos"]
+turmas = ["B", "A", "C", "D"]
+ano_turmas = [
+    1,
+    2,
+    3,
+    4,
+    5,
 ]
-ano_turmas = [1, 2, 3, 4, 5,]
 
-jogos = [
-    "Aventura das Letras",
-    "Mata-Mosca",
-]
+jogos = ["Aventura das Letras", "Mata-Mosca", "Soletrando"]
 
 palavras = [
     "python",
@@ -52,7 +50,7 @@ def random_datetime_last_days(days=30):
 with sqlite3.connect(DB_PATH) as conn:
     conn.execute("PRAGMA foreign_keys = ON;")
     cursor = conn.cursor()
-    
+
     # Inserir turmas
     for turma in turmas:
         for ano in ano_turmas:
@@ -76,7 +74,7 @@ with sqlite3.connect(DB_PATH) as conn:
     jogo_ids = [row[0] for row in cursor.fetchall()]
 
     # Gerar sessões
-    for _ in range(10000):  # quantidade de sessões
+    for _ in range(5000):  # quantidade de sessões
         turma_id = random.choice(turma_ids)
         jogo_id = random.choice(jogo_ids)
         palavra = random.choice(palavras)
@@ -113,15 +111,15 @@ with sqlite3.connect(DB_PATH) as conn:
                 data_execucao,
             ),
         )
-    #inserir alunos
+    # inserir alunos
     for i in range(100):
         aluno_nome = " ".join([random.choice(nomes), random.choice(sobrenomes)])
         ra = int(f"2025{i:04d}")
         turma_id = random.choice(turma_ids)
         cursor.execute(
-                "INSERT OR IGNORE INTO alunos (nome, ra, turma_id) VALUES (?, ?, ?)",
-                (aluno_nome, ra, turma_id),
-            )
+            "INSERT OR IGNORE INTO alunos (nome, ra, turma_id) VALUES (?, ?, ?)",
+            (aluno_nome, ra, turma_id),
+        )
 
     conn.commit()
 

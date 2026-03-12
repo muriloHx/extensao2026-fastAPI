@@ -1,11 +1,12 @@
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
+from sqlalchemy.orm import Session
 
 from ..models import SessoesModel
 
+
 def listar_sessoes(db: Session):
     return db.query(SessoesModel).all()
+
 
 def criar_sessao(db: Session, dados):
     nova = SessoesModel(
@@ -22,7 +23,8 @@ def criar_sessao(db: Session, dados):
     db.refresh(nova)
     return nova
 
-def deletar_sessao(db: Session, sessao_id:int):
+
+def deletar_sessao(db: Session, sessao_id: int):
     sessao = db.get(SessoesModel, sessao_id)
 
     if not sessao:

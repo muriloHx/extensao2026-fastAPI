@@ -1,15 +1,21 @@
-import os
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, func, UniqueConstraint
+from sqlalchemy import (
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
     mapped_column,
     relationship,
 )
-
 
 
 class Base(DeclarativeBase):
@@ -19,9 +25,7 @@ class Base(DeclarativeBase):
 class TurmasModel(Base):
     __tablename__ = "turmas"
 
-    __table_args__ = (
-        UniqueConstraint("ano", "turma", name="uq_ano_turma"),
-    )
+    __table_args__ = (UniqueConstraint("ano", "turma", name="uq_ano_turma"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     ano: Mapped[int] = mapped_column(Integer, nullable=True)
@@ -70,6 +74,7 @@ class SessoesModel(Base):
 
     turma: Mapped["TurmasModel"] = relationship(back_populates="sessoes")
     jogo: Mapped["JogosModel"] = relationship(back_populates="sessoes")
+
 
 class AlunosModel(Base):
     __tablename__ = "alunos"

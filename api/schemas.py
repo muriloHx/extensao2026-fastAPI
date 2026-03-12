@@ -19,6 +19,7 @@ class SessoesCreate(BaseModel):
     acertos: int | None = None
     erros: int | None = None
 
+
 class AlunosCreate(BaseModel):
     turma_id: int | None = None
     ra: int

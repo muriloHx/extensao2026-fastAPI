@@ -1,12 +1,13 @@
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from ..models import JogosModel
 
 
-def listar_jogo(db:Session):
+def listar_jogos(db: Session):
     return db.query(JogosModel).all()
+
 
 def criar_jogo(db: Session, nome: str):
     novo = JogosModel(nome=nome)

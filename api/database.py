@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
+
 from .config import DATABASE_URL
 
 engine = create_engine(
@@ -9,9 +10,11 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(bind=engine)
 
+
 def get_db():
     with SessionLocal() as session:
         yield session
+
 
 class Base(DeclarativeBase):
     pass
