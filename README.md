@@ -1,36 +1,44 @@
 # FastAPI Escola
+## Projeto de Extensão 2026/1
 
-API simples para gerenciamento de turmas, jogos e sessões.
+API FastAPI e dashboard para recebimento e analise de relatorios sobre jogos
 ## Estrutura
 ```
+.
 ├── api
 │   ├── config.py
 │   ├── database.py
 │   ├── __init__.py
 │   ├── main.py
 │   ├── models.py
-│   ├── __pycache__
 │   ├── routers
+│   │   ├── client
+│   │   ├── internal
 │   ├── schemas.py
+│   ├── scripts
+│   │   ├── create_db.py
+│   │   ├── populate_db.py
 │   └── services
+│       ├── alunos_services.py
+│       ├── jogos_services.py
+│       ├── sessoes_services.py
+│       └── turmas_services.py
 ├── dashboard
-│   ├── .streamlit
-│   └── streamlit.py
+│   ├── App.py
+│   ├── pages
+│   │   └── Turmas.py
+│   └── services.py
 ├── db.sqlite3
-├── .env
-├── scripts
-│   ├── create_db.py
-│   └── populate_db.py
+
 
 ```
 
-##Rodar o projeto
+## Rodar o projeto
 1. Criar e ativar ambiente virtual:
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # Linux / macOS
-venv\Scripts\activate     # Windows
+python3 -m venv venv
+source venv/bin/activate  
 ```
 
 2. Instalar Dependências 
@@ -39,25 +47,16 @@ pip install -r requirements.txt
 ```
 3. Criar banco de dados e (opcional) popular
 ```
-python scripts/create_db.py
-python scripts/populate_db.py
+python3 -m api.scripts.create_db
+python3 -m api.scripts.populate_db
 ```
 4. Crie .env e configure como em .env.example
+
+5. Rodar a api
 ```
-#.env file
-API_KEY=""
-DATABASE_URL="sqlite:///./db.sqlite3"
-```
-5. Rodar fastapi com
-```
-uvicorn api.main:app --reload
+uvicorn api.main:app
 ```
 6. Abrir o dashboard
 ```
 streamlit run dashboard/streamlit.py
 ```
-Documentação automática do FastAPI disponivel em localhost:8000/docs
-
-
-
-
