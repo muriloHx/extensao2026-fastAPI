@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from ..models import SessoesModel
 
@@ -13,14 +14,20 @@ def criar_sessao(db: Session, dados):
         turma_id=dados.turma_id,
         jogo_id=dados.jogo_id,
         palavra=dados.palavra,
+        aluno_ra=dados.aluno_ra,
         dificuldade=dados.dificuldade,
         tempo_total=dados.tempo_total,
         acertos=dados.acertos,
         erros=dados.erros,
     )
     db.add(nova)
-    db.commit()
-    db.refresh(nova)
+    try:
+        db.commit()
+        db.refresh(nova)
+    except IntegrityError as e:
+        db.rollback()
+        raise HTTPException(400, detail=str(e.orig))
+
     return nova
 
 

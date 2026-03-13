@@ -73,7 +73,7 @@ class AlunosModel(Base):
 
     turma_id: Mapped[int] = mapped_column(
         ForeignKey("turmas.id", ondelete="CASCADE"),
-        nullable=False,
+        nullable=True,
     )
 
     turma: Mapped["TurmasModel"] = relationship(

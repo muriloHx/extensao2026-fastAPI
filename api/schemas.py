@@ -13,7 +13,7 @@ class JogosCreate(BaseModel):
 class SessoesCreate(BaseModel):
     turma_id: int
     jogo_id: int
-    ra: int
+    aluno_ra: str
     palavra: str | None = None
     dificuldade: str | None = None
     tempo_total: float | None = None
@@ -23,5 +23,5 @@ class SessoesCreate(BaseModel):
 
 class AlunosCreate(BaseModel):
     turma_id: int | None = None
-    ra: int
+    ra: str
     nome: str

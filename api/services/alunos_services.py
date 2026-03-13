@@ -20,6 +20,7 @@ def criar_aluno(db: Session, dados):
         db.commit()
         db.refresh(nova)
     except IntegrityError:
+        db.rollback()
         return HTTPException(status_code=400, detail="Aluno já existe")
     return nova
 
