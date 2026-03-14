@@ -26,3 +26,7 @@ def delete_turma(turma_id: int, db: Session = Depends(get_db)):
 @router.patch("/{turma_id}")
 def patch_turma(turma_id:int, dados: schemas.TurmasUpdate, db: Session = Depends(get_db)):
     return turmas_services.atualizar_turma(db, turma_id, dados)
+
+@router.get("/{turma_id}")
+def get_turma(turma_id: int, db: Session = Depends(get_db)):
+    return turmas_services.get_turma(db, turma_id)

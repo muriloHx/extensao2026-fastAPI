@@ -22,3 +22,11 @@ def post_aluno(aluno: schemas.AlunosCreate, db: Session = Depends(get_db)):
 @router.delete("/{aluno_id}")
 def delete_aluno(aluno_id: int, db: Session = Depends(get_db)):
     return alunos_services.deletar_aluno(db, aluno_id)
+
+@router.get("/{aluno_id}")
+def get_aluno(aluno_id: int, db: Session = Depends(get_db)):
+    return alunos_services.get_aluno(db, aluno_id)
+
+@router.patch("/{aluno_id}")
+def patch_aluno(aluno_id: int, aluno: schemas.AlunosUpdate, db: Session = Depends(get_db)):
+    return alunos_services.atualizar_aluno(db, aluno_id, aluno)

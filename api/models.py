@@ -41,12 +41,12 @@ class TurmasModel(Base):
 
     alunos: Mapped[List["AlunosModel"]] = relationship(
         back_populates="turma",
-        cascade="all, delete-orphan",
+        cascade="save-update, merge",
     )
 
     sessoes: Mapped[List["SessoesModel"]] = relationship(
         back_populates="turma",
-        cascade="all, delete-orphan",
+        cascade="save-update, merge",
     )
 
 
@@ -71,8 +71,8 @@ class AlunosModel(Base):
 
     nome: Mapped[str] = mapped_column(String(120), nullable=False)
 
-    turma_id: Mapped[int] = mapped_column(
-        ForeignKey("turmas.id", ondelete="CASCADE"),
+    turma_id: Mapped[int | None] = mapped_column(
+        ForeignKey("turmas.id", ondelete="SET NULL"),
         nullable=True,
     )
 
@@ -123,8 +123,8 @@ class SessoesModel(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     turma_id: Mapped[int] = mapped_column(
-        ForeignKey("turmas.id", ondelete="CASCADE"),
-        nullable=False,
+        ForeignKey("turmas.id", ondelete="SET NULL"),
+        nullable=True,
     )
 
     jogo_id: Mapped[int] = mapped_column(

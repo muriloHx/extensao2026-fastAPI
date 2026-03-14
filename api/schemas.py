@@ -123,7 +123,7 @@ class AlunosCreate(BaseModel):
             raise ValueError("nome não pode ser vazio")
         if len(v) > 150:
             raise ValueError("nome deve ter no máximo 150 caracteres")
-        return v
+        return v.title()
 
 
 class TurmasUpdate(BaseModel):
@@ -144,4 +144,36 @@ class TurmasUpdate(BaseModel):
             v = v.strip().upper()
             if not v or len(v) > 2:
                 raise ValueError("turma deve ter 1 ou 2 caracteres")
+        return v.upper()
+
+class AlunosUpdate(BaseModel):
+    turma_id: int | None = None
+    ra: str | None = None
+    nome: str | None = None
+
+    @field_validator("turma_id")
+    @classmethod
+    def turma_id_valido(cls, v: int | None) -> int | None:
+        if v is not None and v <= 0:
+            raise ValueError("turma_id deve ser positivo")
         return v
+
+    @field_validator("ra")
+    @classmethod
+    def ra_valido(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("ra não pode ser vazio")
+        if len(v) > 20:
+            raise ValueError("ra deve ter no máximo 20 caracteres")
+        return v
+
+    @field_validator("nome")
+    @classmethod
+    def nome_valido(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("nome não pode ser vazio")
+        if len(v) > 150:
+            raise ValueError("nome deve ter no máximo 150 caracteres")
+        return v.title()

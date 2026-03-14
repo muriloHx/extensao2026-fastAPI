@@ -45,3 +45,9 @@ def atualizar_turma(db:Session, turma_id:int, dados):
     db.commit()
     db.refresh(turma)
     return turma
+
+def get_turma(db:Session, turma_id: int):
+    turma = db.get(TurmasModel, turma_id)
+    if not turma:
+        raise HTTPException(status_code=404, detail="Turma não encontrada")
+    return turma

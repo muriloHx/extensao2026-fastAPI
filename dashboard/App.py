@@ -87,7 +87,7 @@ def apply_filters(df_completo, filtros):
 # SIDEBAR
 # =========================================================
 
-def render_api_status():
+def render_api_status(page_key:str):
     api_online = check_api_health()
 
     col1, col2 = st.sidebar.columns([3, 1], vertical_alignment="center")
@@ -108,6 +108,7 @@ def render_api_status():
             width="stretch",
             help="Recarrega o script",
             type="primary",
+            key=f"reload_api_{page_key}"
         ):
             if check_api_health():
                 add_toast("Conectado", icon="🟢")
@@ -355,7 +356,7 @@ def render_table(df):
 # =========================================================
 def main():
     configure_page()
-    render_api_status()
+    render_api_status("dashboard")
 
     if "df_completo" not in st.session_state:
         st.session_state["df_completo"] = load_and_prepare_data()

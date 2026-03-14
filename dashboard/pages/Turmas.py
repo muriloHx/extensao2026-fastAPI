@@ -26,7 +26,8 @@ def render_kpis(df):
         st.metric("Total seção", len(df["turma"].unique()), help="Ex: A, B, D")
     with col4:
         if st.button("Recarregar dados", type="primary", key="reload_cache_turmas"):
-            st.cache_data.clear()
+            st.session_state.pop("df_completo", None)
+            st.rerun()
 
 def render_forms():
     col1, col2 = st.columns(2)
@@ -37,7 +38,7 @@ def render_forms():
             ano = st.number_input("Ano", placeholder="Ex: 5", min_value=1, value=None)
             turma = st.text_input("Turma", placeholder="Ex: B")
 
-            submitted = st.form_submit_button("Adicionar")
+            submitted = st.form_submit_button("Adicionar", key="btn_post_turma")
 
             if submitted:
                 if not turma or not ano:
@@ -51,7 +52,7 @@ def render_forms():
             st.subheader("Excluir Turmas")
             id = st.number_input("ID", placeholder="Ex: 10", min_value=0, value=None)
             st.space("large")
-            if st.form_submit_button("Excluir"):
+            if st.form_submit_button("Excluir", key="btn_delete_turma"):
                 if not id:
                     add_toast("Preencha o ID corretamente | 🔴")
                 else:
@@ -70,7 +71,7 @@ def dialog_confirm(id):
     st.warning("Isso apagará todas as sessões associadas com essa turma!")
     c1, c2 = st.columns(2)
     with c1:
-        if st.button("Sim", type="primary"):
+        if st.button("Sim", type="primary", key="btn_dialog_delete_turma"):
             delete_data(id, "turmas")
             st.rerun()
     with c2:
@@ -83,7 +84,7 @@ def dialog_confirm(id):
 
 def main():
     configure_page()
-    render_api_status()
+    render_api_status("turmas")
     if "df_completo" not in st.session_state:
         st.session_state["df_completo"] = load_and_prepare_data()
 
