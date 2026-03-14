@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
-from services import get_data, post_data, delete_data, render_toasts
-from App import render_api_status
+from services import post_data, delete_data, render_toasts, add_toast
+from App import render_api_status, load_and_prepare_data
 def configure_page():
     st.set_page_config(
         page_title="Gerenciar Turmas",
@@ -19,11 +19,11 @@ def render_kpis(df):
     st.title("Gerenciar Turmas")
     col1, col2, col3, col4 = st.columns([2,2,2,2])
     with col1:
-        st.metric("Total turmas", len(df))
+        st.metric("Total turmas", len(df), help="Total de turmas unicas cadastradas")
     with col2:
-        st.metric("Total anos", len(df["ano"].unique()))
+        st.metric("Total anos", len(df["ano"].unique()), help="Ex: 1º, 2º, 3º")
     with col3:
-        st.metric("Total seção", len(df["turma"].unique()))
+        st.metric("Total seção", len(df["turma"].unique()), help="Ex: A, B, D")
     with col4:
         if st.button("Recarregar dados", type="primary", key="reload_cache_turmas"):
             st.cache_data.clear()
@@ -40,8 +40,11 @@ def render_forms():
             submitted = st.form_submit_button("Adicionar")
 
             if submitted:
-                data = {"ano": ano, "turma": turma}
-                post_data(data, "turmas")
+                if not turma or not ano:
+                    add_toast("Preencha os dados corretamente | 🔴")
+                else:
+                    data = {"ano": ano, "turma": turma}
+                    post_data(data, "turmas")
 
     with col2:
         with st.form("delete_turma_form", enter_to_submit=False):
@@ -49,7 +52,14 @@ def render_forms():
             id = st.number_input("ID", placeholder="Ex: 10", min_value=0, value=None)
             st.space("large")
             if st.form_submit_button("Excluir"):
-                dialog_confirm(id)
+                if not id:
+                    add_toast("Preencha o ID corretamente | 🔴")
+                else:
+                    dialog_confirm(id)
+
+def render_table(df):
+    st.subheader("Dados detalhados")
+    st.dataframe(df, width="content")
 
 # =========================================================
 # UTILS
@@ -74,16 +84,31 @@ def dialog_confirm(id):
 def main():
     configure_page()
     render_api_status()
-    df_turmas = get_data("turmas")
-    df_turmas = df_turmas.set_index("id")
+    if "df_completo" not in st.session_state:
+        st.session_state["df_completo"] = load_and_prepare_data()
 
-    render_toasts()
-    render_kpis(df_turmas)
+    df_completo = st.session_state["df_completo"]
+    # Selecionar colunas corretamente
+    df = df_completo[["turma_id", "ano", "turma", "aluno_ra"]]
+
+    df = (
+        df.groupby(["turma_id", "ano", "turma"])["aluno_ra"]
+        .nunique()
+        .reset_index()
+        .rename(columns={"aluno_ra": "total_alunos"})
+    )
+
+
+    render_kpis(df)
     render_forms()
-    st.table(df_turmas)
+
+    st.divider()
+    render_table(df)
+
 
 
 
 
 with st.spinner("Carregando"):
     main()
+    render_toasts()

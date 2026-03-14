@@ -28,8 +28,6 @@ jogos = [
     "Aventura das Letras",
     "Mata-Mosca",
     "Soletrando",
-    "Caça-Palavras",
-    "Forca Digital",
 ]
 
 # Palavras agrupadas por dificuldade percebida

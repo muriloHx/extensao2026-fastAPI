@@ -29,3 +29,19 @@ def deletar_turma(db: Session, turma_id: int):
     db.delete(turma)
     db.commit()
     return {"detail": f"Turma deletada [{turma.turma} {turma.ano}] com sucesso."}
+
+def atualizar_turma(db:Session, turma_id:int, dados):
+    turma = db.get(TurmasModel, turma_id)
+    if not turma:
+        raise HTTPException(status_code=404, detail="Turma não encontrada")
+
+    campos = dados.model_dump(exclude_unset=True, exclude_none=True)
+    if not campos:
+            raise HTTPException(status_code=400, detail="Nenhum campo enviado")
+
+    for campo, valor in campos.items():
+            setattr(turma, campo, valor)
+
+    db.commit()
+    db.refresh(turma)
+    return turma

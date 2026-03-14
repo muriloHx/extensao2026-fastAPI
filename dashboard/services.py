@@ -5,6 +5,7 @@ import pandas as pd
 import requests
 import streamlit as st
 from dotenv import load_dotenv
+import time
 
 # =========================================================
 # CONFIG
@@ -40,6 +41,10 @@ def _handle_response(response: requests.Response) -> None:
 
     try:
         detail = response.json().get("detail", "")
+        try:
+            detail = detail[0]["msg"]
+        except TypeError:
+            raise ValueError
     except ValueError:
         detail = response.text
 
@@ -67,17 +72,16 @@ def check_api_health() -> bool:
 
 def post_data(data: Dict[str, Any], endpoint: str) -> None:
     response = _request("POST", _url(endpoint), json=data)
-    if response:
+    if response is not None:
         _handle_response(response)
 
 
 def delete_data(item_id: int, endpoint: str) -> None:
     response = _request("DELETE", f"{_url(endpoint)}{item_id}")
-    if response:
+    if response is not None:
         _handle_response(response)
 
 
-@st.cache_data(show_spinner=False)
 def get_data(endpoint: str) -> pd.DataFrame:
     response = _request("GET", _url(endpoint))
 
@@ -107,6 +111,8 @@ def add_toast(*args, **kwargs) -> None:
 def render_toasts() -> None:
     for args, kwargs in st.session_state.pop("toasts", []):
         st.toast(*args, **kwargs)
+        time.sleep(0.5)
+
 
     if st.session_state.pop("balloons", False):
         st.balloons()

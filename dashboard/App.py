@@ -3,6 +3,8 @@ import pandas as pd
 from datetime import datetime
 from streamlit_autorefresh import st_autorefresh
 from services import get_data, check_api_health, add_toast, render_toasts
+import plotly.graph_objects as go
+
 # =========================================================
 # CONFIG
 # =========================================================
@@ -115,7 +117,6 @@ def render_api_status():
 
 def render_filters(df_completo):
     with st.sidebar.expander("Filtros"):
-
         col1, col2 = st.columns(2)
 
         with col1:
@@ -237,6 +238,7 @@ def render_kpis(df):
     col4.metric("Erros Totais", int(df["erros"].sum() or 0))
     with col5:
         if st.button("Recarregar dados", type="primary", key="reload_cache_app"):
+            print("Recarregar dados")
             st.session_state.pop("df_completo", None)
             st.rerun()
 
@@ -265,13 +267,61 @@ def render_evolution(df):
     st.divider()
 
 def render_acertos_turma(df):
-    st.subheader("Relação Acertos-Turma")
-    # Agrupa por data e turma, somando acertos
-    df_turma_acertos = (
-        df.groupby("turma")["acertos"].sum().sort_values(ascending=False)
-    )
+    df = df.copy()
+    df["taxa_acerto"] = df["acertos"] / (df["acertos"] + df["erros"])
 
-    st.bar_chart(df_turma_acertos)
+    turma_stats = (
+        df.groupby("turma")
+        .agg(
+            taxa_acerto=("taxa_acerto", "mean"),
+            total_sessoes=("acertos", "count"),
+        )
+        .reset_index()
+        .sort_values("taxa_acerto", ascending=False)
+    )
+    turma_stats["taxa_acerto_pct"] = (turma_stats["taxa_acerto"] * 100).round(1)
+
+    media_geral = turma_stats["taxa_acerto_pct"].mean()
+    melhor = turma_stats.iloc[0]
+    pior = turma_stats.iloc[-1]
+
+
+    help_melhor_turma = "A turma com maior taxa de acerto média. Calculada fazendo acertos / (acertos + erros) em cada sessão, depois tirando a média de todas as sessões daquela turma. A que tiver a maior média aparece aqui."
+    help_media_geral = "A média das taxas de acerto de todas as turmas, usada como linha de referência no gráfico. Turmas acima dela ficam verdes, abaixo ficam vermelhas."
+    help_atencao = "O oposto da melhor turma: a que tem a menor taxa de acerto média, ou seja, a que mais erra proporcionalmente."
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Melhor turma", melhor["turma"], f"{melhor['taxa_acerto_pct']}%", help = help_melhor_turma)
+    col2.metric("Média geral", f"{media_geral:.1f}%", help = help_media_geral)
+    col3.metric("Atenção", pior["turma"], f"{pior['taxa_acerto_pct']}%", delta_color="inverse", help = help_atencao)
+
+
+    cores = [
+        "#1D9E75" if v >= media_geral else "#E24B4A"
+        for v in turma_stats["taxa_acerto_pct"]
+    ]
+
+    fig = go.Figure()
+    fig.add_bar(
+        x=turma_stats["turma"],
+        y=turma_stats["taxa_acerto_pct"],
+        marker_color=cores,
+        hovertemplate="%{x}: %{y:.1f}%<extra></extra>",
+    )
+    fig.add_hline(
+        y=media_geral,
+        line_dash="dash",
+        line_color="gray",
+        line_width=1.5,
+        annotation_text=f"média {media_geral:.1f}%",
+        annotation_position="top right",
+    )
+    fig.update_layout(
+        yaxis=dict(range=[0, 100], ticksuffix="%", title="taxa de acerto"),
+        xaxis_title="turma",
+        showlegend=False,
+        margin=dict(t=20, b=20),
+    )
+    st.plotly_chart(fig, width="stretch")
 
 
 def render_table(df):
@@ -295,6 +345,7 @@ def render_table(df):
             ]
         ],
         width="stretch",
+        placeholder="",
     )
 
 
@@ -315,13 +366,18 @@ def main():
 
     render_toasts()
     render_download_dialog(df, filtros)
+
     render_kpis(df)
-    render_ranking(df)
     col1, col2 = st.columns(2)
+
     with col1:
-        render_evolution(df)
+        render_ranking(df)
     with col2:
-        render_acertos_turma(df)
+        render_evolution(df)
+
+    st.subheader("Turmas")
+    render_acertos_turma(df)
+
     render_table(df)
 
 
